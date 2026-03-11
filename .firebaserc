@@ -1,0 +1,24 @@
+{
+  "projects": {
+    "default": "timer-2d681"
+  },
+  "targets": {
+    "timer-2d681": {
+      "hosting": {
+        "dev": [
+          "timer-2d681-dev"
+        ],
+        "stage": [
+          "timer-2d681-stage"
+        ],
+        "prod": [
+          "timer-2d681"
+        ],
+        "hotfix": [
+          "timer-2d681-hotfix"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
