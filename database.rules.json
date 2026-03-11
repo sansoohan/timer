@@ -1,6 +1,36 @@
 {
   "rules": {
-    ".read": false,
-    ".write": false
+    "users": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid",
+        "timers": {
+          "$timerId": {
+            "name": {
+              ".validate": "newData.isString() && newData.val().length <= 50"
+            },
+            "accumulatedMs": {
+              ".validate": "newData.isNumber() && newData.val() >= 0"
+            },
+            "recentStartAt": {
+              ".validate": "!newData.exists() || newData.isNumber()"
+            },
+            "currentStartAt": {
+              ".validate": "!newData.exists() || newData.isNumber()"
+            },
+            "sessions": {
+              "$sessionId": {
+                "startAt": {
+                  ".validate": "newData.isNumber()"
+                },
+                "endAt": {
+                  ".validate": "!newData.exists() || newData.isNumber()"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }
