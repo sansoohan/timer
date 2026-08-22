@@ -9,10 +9,12 @@ import { SignInPage } from './pages/SignInPage';
 import { SignUpPage } from './pages/SignUpPage';
 import {
   ROUTE_SIGN_IN,
-  ROUTE_SIGN_UP,    
+  ROUTE_SIGN_UP,
   ROUTE_USER_TIMERS,
+  ROUTE_USER_TIMER,
 } from '~/constants/routes';
 import { TimersPage } from './pages/TimersPage';
+import { UserTimerPage } from './pages/UserTimerPage';
 
 export default function App() {
   return (
@@ -27,6 +29,7 @@ export default function App() {
               <Route path={ROUTE_SIGN_IN} element={<SignInPage />} />
               <Route path={ROUTE_SIGN_UP} element={<SignUpPage />} />
               <Route path={ROUTE_USER_TIMERS} element={<TimersPage />} />
+              <Route path={ROUTE_USER_TIMER} element={<UserTimerPage />} />
 
               {/* Default Page */}
               <Route path="*" element={<Navigate to={ROUTE_SIGN_IN} replace />} />

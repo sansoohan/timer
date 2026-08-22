@@ -1,5 +1,8 @@
+// pages/TimersPage/components/TimerRow.tsx
+import { generatePath, useNavigate, useParams } from 'react-router-dom';
 import { HamburgerDivider } from '~/components/HamburgerDivider';
 import { HamburgerMenu } from '~/components/HamburgerMenu';
+import { ROUTE_USER_TIMER } from '~/constants/routes';
 import type { TimerItem } from '~/types/timer';
 
 function formatAccumulatedTime(ms: number): string {
@@ -18,7 +21,6 @@ type TimerRowProps = {
   timer: TimerItem;
   now: number;
   onToggle: (timer: TimerItem) => void;
-  onOpenDetail: (timerId: string) => void;
   onRename: (timer: TimerItem) => void;
   onDelete: (timer: TimerItem) => void;
 };
@@ -27,10 +29,12 @@ export function TimerRow({
   timer,
   now,
   onToggle,
-  onOpenDetail,
   onRename,
   onDelete,
 }: TimerRowProps) {
+  const { uid } = useParams<{ uid: string }>();
+  const nav = useNavigate();
+
   const isRunning = timer.currentStartAt != null;
   const displayName = timer.name.trim() || ' ';
   const elapsedMs = isRunning
@@ -38,6 +42,11 @@ export function TimerRow({
     : 0;
   const displayMs = timer.accumulatedMs + elapsedMs;
   const timerColor = isRunning ? 'text-success' : 'text-light';
+
+  const handleOpenDetail = () => {
+    if (!uid) return;
+    nav(generatePath(ROUTE_USER_TIMER, { uid, timerId: timer.id }));
+  };
 
   return (
     <div className='border rounded-3 px-3 py-3 mb-3 shadow-sm'>
@@ -74,7 +83,7 @@ export function TimerRow({
               <button
                 className='dropdown-item'
                 type='button'
-                onClick={() => onOpenDetail(timer.id)}
+                onClick={handleOpenDetail}
               >
                 누적시간 상세보기
               </button>
