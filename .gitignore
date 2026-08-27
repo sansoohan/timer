@@ -56,3 +56,6 @@ dist-ssr
 # Log
 *-debug.log
 *-error.log
+
+# serviceAccountKey
+serviceAccountKey.json

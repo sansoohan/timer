@@ -9,8 +9,11 @@
             "name": {
               ".validate": "newData.isString() && newData.val().length <= 50"
             },
+            "order": {
+              ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+            },
             "accumulatedMs": {
-              ".validate": "newData.isNumber() && newData.val() >= 0"
+              ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
             },
             "recentStartAt": {
               ".validate": "!newData.exists() || newData.isNumber()"
@@ -18,15 +21,42 @@
             "currentStartAt": {
               ".validate": "!newData.exists() || newData.isNumber()"
             },
-            "sessions": {
-              "$sessionId": {
-                "startAt": {
-                  ".validate": "newData.isNumber()"
-                },
-                "endAt": {
-                  ".validate": "!newData.exists() || newData.isNumber()"
-                }
-              }
+            "oddDayText": {
+              ".validate": "!newData.exists() || newData.isString()"
+            },
+            "evenDayText": {
+              ".validate": "!newData.exists() || newData.isString()"
+            },
+            "oddWeekText": {
+              ".validate": "!newData.exists() || newData.isString()"
+            },
+            "evenWeekText": {
+              ".validate": "!newData.exists() || newData.isString()"
+            },
+            "oddMonthText": {
+              ".validate": "!newData.exists() || newData.isString()"
+            },
+            "evenMonthText": {
+              ".validate": "!newData.exists() || newData.isString()"
+            },
+            "counter": {
+              ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+            }
+          }
+        }
+      }
+    },
+    "timerSessions": {
+      "$timerId": {
+        ".read": "auth != null && root.child('users').child(auth.uid).child('timers').child($timerId).exists()",
+        ".write": "auth != null && root.child('users').child(auth.uid).child('timers').child($timerId).exists()",
+        "sessions": {
+          "$sessionId": {
+            "startAt": {
+              ".validate": "newData.isNumber()"
+            },
+            "endAt": {
+              ".validate": "!newData.exists() || newData.isNumber()"
             }
           }
         }

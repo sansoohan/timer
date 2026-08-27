@@ -1,10 +1,12 @@
-// pages/UserTimerPage.tsx
+// pages/UserTimerPage/omponents/AccumulatedTimerPage.tsx
 import { useEffect, useMemo, useState } from 'react';
 import { generatePath, useNavigate, useParams } from 'react-router-dom';
 import { get, ref, update } from 'firebase/database';
 import { format, isValid, parse } from 'date-fns';
 import { ROUTE_USER_TIMERS } from '~/constants/routes';
 import { HamburgerMenu } from '~/components/HamburgerMenu';
+import { HamburgerDivider } from '~/components/HamburgerDivider';
+import { RotationSettingsModal } from '~/components/RotationSettingsModal';
 import { LogoutButton } from '~/components/LogoutButton';
 import { PaginationControls } from '~/components/PaginationControls';
 import { useAuth } from '~/contexts/AuthContext';
@@ -102,7 +104,7 @@ function computeAccumulatedMs(sessions: TimerSession[]): number {
   }, 0);
 }
 
-export function UserTimerPage() {
+export function AccumulatedTimerPage() {
   const { uid, timerId } = useParams<{ uid: string; timerId: string }>();
   const nav = useNavigate();
   const { user } = useAuth();
@@ -122,6 +124,7 @@ export function UserTimerPage() {
   const [modalStart, setModalStart] = useState('');
   const [modalEnd, setModalEnd] = useState('');
   const [modalError, setModalError] = useState<string | null>(null);
+  const [rotationSettingsOpen, setRotationSettingsOpen] = useState(false);
 
   useEffect(() => {
     if (!uid || !timerId) return;
@@ -141,15 +144,17 @@ export function UserTimerPage() {
           return;
         }
 
-        const timerRef = ref(database, `users/${uid}/timers/${timerId}`);
-        const snapshot = await get(timerRef);
+        const [timerSnapshot, sessionsSnapshot] = await Promise.all([
+          get(ref(database, `users/${uid}/timers/${timerId}`)),
+          get(ref(database, `timerSessions/${timerId}/sessions`)),
+        ]);
 
-        if (!snapshot.exists()) {
+        if (!timerSnapshot.exists()) {
           setError('타이머를 찾을 수 없습니다.');
           return;
         }
 
-        const rawSessions = snapshot.child('sessions').val() as
+        const rawSessions = sessionsSnapshot.val() as
           | Record<string, { startAt?: unknown; endAt?: unknown }>
           | null;
 
@@ -218,12 +223,18 @@ export function UserTimerPage() {
         };
       }
 
-      const timerRef = ref(database, `users/${uid}/timers/${timerId}`);
+      const completedCount = sessions.reduce(
+        (count, session) => count + (session.endAt == null ? 0 : 1),
+        0,
+      );
 
-      await update(timerRef, {
-        // 빈 객체는 기존 sessions를 지우지 않으므로, 0개면 null로 삭제한다.
-        sessions: sessions.length === 0 ? null : sessionsData,
-        accumulatedMs: computeAccumulatedMs(sessions),
+      await update(ref(database), {
+        [`timerSessions/${timerId}/sessions`]:
+          sessions.length === 0 ? null : sessionsData,
+        [`users/${uid}/timers/${timerId}/accumulatedMs`]:
+          computeAccumulatedMs(sessions),
+        [`users/${uid}/timers/${timerId}/counter`]:
+          completedCount,
       });
 
       nav(generatePath(ROUTE_USER_TIMERS, { uid }));
@@ -362,6 +373,16 @@ export function UserTimerPage() {
         </div>
 
         <HamburgerMenu>
+          <li>
+            <button
+              className="dropdown-item"
+              type="button"
+              onClick={() => setRotationSettingsOpen(true)}
+            >
+              로테이션 문구 설정
+            </button>
+          </li>
+          <HamburgerDivider />
           <LogoutButton />
         </HamburgerMenu>
       </div>
@@ -503,6 +524,14 @@ export function UserTimerPage() {
           </div>
         </div>
       )}
+      {rotationSettingsOpen && uid && timerId && (
+        <RotationSettingsModal
+          uid={uid}
+          timerId={timerId}
+          onClose={() => setRotationSettingsOpen(false)}
+        />
+      )}
+
     </div>
   );
 }

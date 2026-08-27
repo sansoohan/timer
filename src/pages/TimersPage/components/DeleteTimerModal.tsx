@@ -21,8 +21,9 @@ export function DeleteTimerModal({
   const handleConfirmDelete = async () => {
     if (!uid) return;
 
-    await update(ref(database, `users/${uid}/timers`), {
-      [timer.id]: null,
+    await update(ref(database), {
+      [`users/${uid}/timers/${timer.id}`]: null,
+      [`timerSessions/${timer.id}`]: null,
     });
 
     onClose();
