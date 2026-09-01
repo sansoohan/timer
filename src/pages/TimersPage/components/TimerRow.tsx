@@ -6,6 +6,7 @@ import { HamburgerDivider } from '~/components/HamburgerDivider';
 import { HamburgerMenu } from '~/components/HamburgerMenu';
 import { ROUTE_USER_CHECKLIST, ROUTE_USER_TIMER } from '~/constants/routes';
 import type { TimerItem } from '~/types/timer';
+import { getRotationMessages } from '~/utils/rotation';
 
 function formatAccumulatedTime(ms: number): string {
   const totalSeconds = Math.floor(ms / 1000);
@@ -90,9 +91,14 @@ export function TimerRow({
   const timerColor = isRunning ? 'text-success' : 'text-light';
 
   const stoppedRecordMessages =
-    isRecord && !isRunning
-      ? (timer.lastRotationMessages ?? []).filter(
-          message => message.text.trim().length > 0,
+    isRecord &&
+    !isRunning &&
+    timer.lastStoppedAt != null
+      ? getRotationMessages(
+          timer,
+          timer.lastStoppedAt,
+          Math.max(0, timer.counter - 1),
+          'stop',
         )
       : [];
 

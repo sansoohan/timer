@@ -99,9 +99,10 @@ export function TimersPage() {
           // Firebase에 저장된 반전 옵션을 TimerItem에도 반드시 넣는다.
           reverseRotation: timer.reverseRotation === true,
 
-          lastRotationMessages: Array.isArray(timer.lastRotationMessages)
-            ? timer.lastRotationMessages
-            : undefined,
+          lastStoppedAt:
+            typeof timer.lastStoppedAt === 'number'
+              ? timer.lastStoppedAt
+              : undefined,
         } as TimerItem;
       });
 
@@ -156,7 +157,6 @@ export function TimersPage() {
         await update(ref(database), {
           [`users/${uid}/timers/${timer.id}/currentStartAt`]: startedAt,
           [`users/${uid}/timers/${timer.id}/recentStartAt`]: startedAt,
-          [`users/${uid}/timers/${timer.id}/lastRotationMessages`]: null,
           [`timerSessions/${timer.id}/sessions/${startedAt}/startAt`]: startedAt,
         });
 
@@ -178,8 +178,7 @@ export function TimersPage() {
       await update(ref(database), {
         [`users/${uid}/timers/${timer.id}/currentStartAt`]: null,
         [`users/${uid}/timers/${timer.id}/counter`]: increment(1),
-        [`users/${uid}/timers/${timer.id}/lastRotationMessages`]:
-          stopMessages.length > 0 ? stopMessages : null,
+        [`users/${uid}/timers/${timer.id}/lastStoppedAt`]: endedAt,
         [`timerSessions/${timer.id}/sessions/${startedAt}/endAt`]: endedAt,
       });
 

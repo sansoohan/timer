@@ -1,16 +1,5 @@
 // types/timer.ts
 
-export type StoredRotationMessage = {
-  label:
-    | '오늘'
-    | '내일'
-    | '이번주'
-    | '다음주'
-    | '이번달'
-    | '다음달';
-  text: string;
-};
-
 type BaseTimerItem = {
   id: string;
   name: string;
@@ -28,8 +17,9 @@ type BaseTimerItem = {
 
   reverseRotation?: boolean;
 
-  // 기록 타이머 종료 후 카드에 보여줄 마지막 로테이션 문구.
-  lastRotationMessages?: StoredRotationMessage[];
+  // 기록 타이머의 마지막 종료시각.
+  // 카드의 종료 문구는 이 시각을 기준으로 utils/rotation.ts에서 다시 계산한다.
+  lastStoppedAt?: number;
 };
 
 export type AccumulatedTimerItem = BaseTimerItem & {

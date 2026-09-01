@@ -16,8 +16,34 @@ export type RotationMessage = {
 
 export type RotationTrigger = 'start' | 'stop';
 
+export type RotationParity = {
+  isOddDay: boolean;
+  isOddWeek: boolean;
+  isOddMonth: boolean;
+};
+
 export function getSessionCount(timer: TimerItem): number {
   return timer.counter ?? 0;
+}
+
+/**
+ * 실제 시점 기준 홀짝 상태.
+ *
+ * 중요:
+ * - reverseRotation은 여기서 적용하지 않는다.
+ * - 설정 화면의 "(현재)" 표시는 이 값을 그대로 사용한다.
+ */
+export function getRotationParity(
+  at: number,
+  sessionCount: number,
+): RotationParity {
+  const date = new Date(at);
+
+  return {
+    isOddDay: sessionCount % 2 === 1,
+    isOddWeek: getISOWeek(date) % 2 === 1,
+    isOddMonth: (date.getMonth() + 1) % 2 === 1,
+  };
 }
 
 function addMessage(
@@ -41,11 +67,11 @@ export function getRotationMessages(
   sessionCount: number,
   trigger: RotationTrigger,
 ): RotationMessage[] {
-  const date = new Date(at);
-
-  let isOddDay = sessionCount % 2 === 1;
-  let isOddWeek = getISOWeek(date) % 2 === 1;
-  let isOddMonth = (date.getMonth() + 1) % 2 === 1;
+  let {
+    isOddDay,
+    isOddWeek,
+    isOddMonth,
+  } = getRotationParity(at, sessionCount);
 
   let dayLabel: RotationMessage['label'] =
     trigger === 'stop' ? '내일' : '오늘';
@@ -56,14 +82,14 @@ export function getRotationMessages(
   let monthLabel: RotationMessage['label'] =
     trigger === 'stop' ? '다음달' : '이번달';
 
-  // 종료 클릭에서만 다음 로테이션 문구를 보여준다.
-  // DB 값은 변경하지 않고 표시용 홀짝만 반전한다.
+  // 종료 클릭에서는 종료시각(at)을 기준으로
+  // 다음 주 / 다음 달 문구를 보여주기 위해 홀짝을 반전한다.
   if (trigger === 'stop') {
     isOddWeek = !isOddWeek;
     isOddMonth = !isOddMonth;
   }
 
-  // 옵션이 켜져 있으면 레이블과 실제 값 선택을 전부 정반대로 뒤집는다.
+  // "반대로 보여주기"는 실제 출력에만 적용한다.
   if (timer.reverseRotation === true) {
     isOddDay = !isOddDay;
     isOddWeek = !isOddWeek;

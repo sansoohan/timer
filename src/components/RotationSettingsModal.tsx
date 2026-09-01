@@ -1,9 +1,10 @@
 // components/RotationSettingsModal.tsx
 
 import { useEffect, useState } from 'react';
-import { getISOWeek } from 'date-fns';
 import { get, ref, update } from 'firebase/database';
+
 import { database } from '~/constants/firebase';
+import { getRotationParity } from '~/utils/rotation';
 
 type RotationFields = {
   oddDayText: string;
@@ -112,17 +113,11 @@ export function RotationSettingsModal({
     }
   };
 
-  const now = new Date();
-
-  let isOddDay = sessionCount % 2 === 1;
-  let isOddWeek = getISOWeek(now) % 2 === 1;
-  let isOddMonth = (now.getMonth() + 1) % 2 === 1;
-
-  if (reverseRotation) {
-    isOddDay = !isOddDay;
-    isOddWeek = !isOddWeek;
-    isOddMonth = !isOddMonth;
-  }
+  const {
+    isOddDay,
+    isOddWeek,
+    isOddMonth,
+  } = getRotationParity(Date.now(), sessionCount);
 
   const isCurrent: Record<keyof RotationFields, boolean> = {
     oddDayText: isOddDay,
